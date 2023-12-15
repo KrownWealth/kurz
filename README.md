@@ -1,6 +1,7 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
 
 ## Getting Started
+Graspr is an AI assisted EdTech applicatio used for summarizing videos and PDF files.
 
 First, run the development server:
 
