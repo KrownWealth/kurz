@@ -1,0 +1,13 @@
+
+import { FaBookOpen } from "react-icons/fa";
+
+const TestKnowBtn = () => {
+  return(
+    <button className="flex items-center active">
+    <span className="mr-2"><FaBookOpen /></span>
+   Test Knowledge
+  </button>
+       
+  )
+}
+export default TestKnowBtn;

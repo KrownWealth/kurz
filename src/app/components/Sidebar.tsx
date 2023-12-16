@@ -1,14 +1,18 @@
 
-
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{ history: string[] }> = ({ history }) => {
   return (
+   
+     
     <div className="sidebar">
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Service</a></li>
-        <li><a href="#">About</a></li>
+    <h2 className="pb-4 font-bold">Graspr AI</h2>
+      <ul className="space-y-4 border p-4 h-screen">
+        {history.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
       </ul>
     </div>
+   
+    
   );
 };
 
