@@ -1,7 +1,7 @@
 
 
 ## Getting Started
-Graspr is an AI assisted EdTech applicatio used for summarizing videos and PDF files.
+Kurz is an AI assisted EdTech application used for summarizing videos and PDF files.
 
 First, run the development server:
 

@@ -1,22 +1,13 @@
-"use client"
-import Sidebar from './components/Sidebar';
-import MainContent from './components/MainContent';
-import RightSidebar from './components/RightSidebar';
-import Header from './components/Header'
-import { useState } from 'react';
+import { SummaryView } from "../../views"
+import { Header } from "../components/shared"
 
-export default function Home() {
-  const [history, setHistory] = useState<string[]>([]);
 
+export default function HomePage() {
   return (
-    <main>
-       <Header />
-       <div className="flex p-4">
-       <Sidebar history={history} />
-        <MainContent setHistory={setHistory} />
-      <RightSidebar />
-       </div>
-    
-    </main>
+    <div className="flex flex-col h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+      <Header />
+      <SummaryView />
+
+    </div>
   )
 }
