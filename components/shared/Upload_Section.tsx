@@ -1,7 +1,7 @@
 "use client"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { VideoInput } from "./Video_Input"
 import { File_Uploader } from "./File_Uploader"
 
@@ -9,23 +9,18 @@ import { File_Uploader } from "./File_Uploader"
 export function UploadSection({
   isProcessing,
   setSummary,
-  setIsProcessing
+  setIsProcessing,
+  videoUrl,
+  setVideoUrl,
 }: {
   isProcessing: boolean;
   setSummary: React.Dispatch<React.SetStateAction<string | null>>;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+  videoUrl: string | null;
+  setVideoUrl: (svideoUrl: string) => void;
 }) {
 
 
-  const handleFileUploadComplete = () => {
-    setIsProcessing(false)
-    // In a real app, this would trigger the summary display
-  }
-
-  const handleVideoProcessingComplete = () => {
-    setIsProcessing(false)
-    // In a real app, this would trigger the summary display
-  }
 
   return (
     <Card className="h-full">
@@ -49,9 +44,11 @@ export function UploadSection({
           </TabsContent>
           <TabsContent value="video" className="mt-6">
             <VideoInput
-              onProcessingStart={() => setIsProcessing(true)}
-              onProcessingComplete={handleVideoProcessingComplete}
               isProcessing={isProcessing}
+              setIsProcessing={setIsProcessing}
+              setSummary={setSummary}
+              videoUrl={videoUrl}
+              setVideoUrl={setVideoUrl}
             />
           </TabsContent>
         </Tabs>

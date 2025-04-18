@@ -2,15 +2,15 @@
 
 import { useState } from 'react'
 import { FileUp, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '../ui/button'
 import * as pdfjsLib from 'pdfjs-dist'
-import { SummaryData } from '../../../types/summaryType'
+import { SummaryData } from '../../types/summaryType'
 
-
+// Set up the PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
+  'pdfjs-dist/build/pdf.worker.min.js',
   import.meta.url
-).toString();
+).toString()
 
 
 type PDFTextItem = {
@@ -27,9 +27,9 @@ export function File_Uploader({
   setSummary,
   setIsProcessing
 }: {
-  isProcessing: boolean;
-  setSummary: React.Dispatch<React.SetStateAction<string | null>>;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+  isProcessing: boolean
+  setSummary: React.Dispatch<React.SetStateAction<string | null>>
+  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   const [file, setFile] = useState<File | null>(null)
 
@@ -41,7 +41,7 @@ export function File_Uploader({
   }
 
   const handleSummarize = async () => {
-    if (!file) return
+    if (!file || isProcessing) return
 
     setIsProcessing(true)
 
@@ -67,11 +67,9 @@ export function File_Uploader({
       reader.readAsArrayBuffer(file)
     } catch (err) {
       console.error('❌ Summary Error:', err)
-    } finally {
       setIsProcessing(false)
     }
   }
-
 
   const sendToApi = async (text: string) => {
     try {
@@ -90,6 +88,8 @@ export function File_Uploader({
       console.log('✅ Summary API Response:', data)
     } catch (error) {
       console.error('❌ Failed to send to API:', error)
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -99,7 +99,9 @@ export function File_Uploader({
         <label className="block border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer">
           <FileUp className="h-10 w-10 mx-auto text-gray-400" />
           <h3 className="mt-4 text-lg font-semibold">Upload PDF File</h3>
-          <p className="mt-2 text-sm text-gray-500">Drag and drop your file here, or click to browse</p>
+          <p className="mt-2 text-sm text-gray-500">
+            Drag and drop your file here, or click to browse
+          </p>
           <p className="mt-1 text-xs text-gray-400">Supports PDF files up to 50MB</p>
           <input
             id="file"
@@ -111,12 +113,11 @@ export function File_Uploader({
         </label>
       ) : (
         <div className="text-center text-sm font-medium text-green-600">
-          ✅ File selected:{" "}
+          ✅ File selected:{' '}
           <span className="inline-block max-w-full truncate align-middle" title={file.name}>
             {file.name}
           </span>
         </div>
-
       )}
 
       <Button
@@ -130,10 +131,9 @@ export function File_Uploader({
             Summarizing...
           </>
         ) : (
-          "Summarize"
+          'Summarize'
         )}
       </Button>
-
     </div>
   )
 }

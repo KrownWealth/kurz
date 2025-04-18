@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
+import { Button } from "../ui/button"
 import { Download, Copy, Check } from "lucide-react"
 import { toast } from "sonner"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "../ui/scroll-area"
+import ReactMarkdown from 'react-markdown';
 
 interface SummaryProps {
-  summary: string | null
+  summary: string | null;
   isProcessing: boolean;
 }
 
@@ -82,18 +84,30 @@ export function SummarySection({ summary, isProcessing }: SummaryProps) {
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto">
-        <ScrollArea className="h-full">
-          {isProcessing ? (
-            <div>
-              Summarizing...
-            </div>
-          ) : (
-            <div className="prose dark:prose-invert whitespace-pre-wrap">
-              {summary}
-            </div>
-          )}
+        <Tabs defaultValue="main-points" className="w-full h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
+            <TabsTrigger value="main-points">Main Points</TabsTrigger>
+            <TabsTrigger value="full-summary">Full Summary</TabsTrigger>
+            <TabsTrigger value="key-terms">Key Terms</TabsTrigger>
+          </TabsList>
 
-        </ScrollArea>
+          <div className="flex-1 overflow-hidden mt-6">
+            <TabsContent value="main-points" className="h-full data-[state=active]:flex flex-col">
+              <ScrollArea className="h-full">
+                {isProcessing ? (
+                  <div>
+                    Summarizing...
+                  </div>
+                ) : (
+                  <div className="prose dark:prose-invert whitespace-pre-wrap">
+                    <ReactMarkdown>{summary}</ReactMarkdown>
+                  </div>
+                )}
+
+              </ScrollArea>
+            </TabsContent>
+          </div>
+        </Tabs>
       </CardContent>
     </Card>
   )

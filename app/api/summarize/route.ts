@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Hello World",
+      // message: "Hello World",
       summary: summaryText,
     });
   } catch (error) {
