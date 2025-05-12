@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { FileUp, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import * as pdfjsLib from 'pdfjs-dist'
-import { SummaryData } from '../../types/summaryType'
+import type { VideoSummaryData } from '../../types/summaryType'
+import 'pdfjs-dist/web/pdf_viewer.css';
 
 // Set up the PDF.js worker
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.js',
   import.meta.url
@@ -28,17 +30,36 @@ export function File_Uploader({
   setIsProcessing
 }: {
   isProcessing: boolean
-  setSummary: React.Dispatch<React.SetStateAction<string | null>>
+  setSummary: (data: string) => void;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   const [file, setFile] = useState<File | null>(null)
+  const [fileSizeError, setFileSizeError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0]
-      setFile(selectedFile)
+      validateAndSetFile(selectedFile)
     }
   }
+
+  const validateAndSetFile = async (file: File) => {
+    const validTypes = [".pdf"];
+    if (!validTypes.includes(file.type)) {
+      setFileSizeError("Invalid file type. Supported formats: PDF")
+      return false;
+    }
+
+    const maxSize = 1 * 1024 * 1024; // 1MB 
+    if (file.size > maxSize) {
+      setFileSizeError("PDF File too large (maximum 1MB is allowed")
+      return false;
+    }
+
+    setFile(file);
+    return true;
+  };
+
 
   const handleSummarize = async () => {
     if (!file || isProcessing) return
@@ -53,6 +74,12 @@ export function File_Uploader({
 
         const typedArray = new Uint8Array(result as ArrayBuffer)
         const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise
+        if (pdf.numPages > 10) {
+          setIsProcessing(false);
+          setFileSizeError("This app supports a maximum of 10 pages per PDF.")
+          return;
+        }
+
         const page = await pdf.getPage(1)
         const content = await page.getTextContent()
 
@@ -83,9 +110,8 @@ export function File_Uploader({
 
       if (!res.ok) throw new Error(`API Error: ${res.status}`)
 
-      const data: SummaryData = await res.json()
-      setSummary(data.summary)
-      console.log('✅ Summary API Response:', data)
+      const data = await res.json()
+      setSummary(data.summary);
     } catch (error) {
       console.error('❌ Failed to send to API:', error)
     } finally {
@@ -102,7 +128,7 @@ export function File_Uploader({
           <p className="mt-2 text-sm text-gray-500">
             Drag and drop your file here, or click to browse
           </p>
-          <p className="mt-1 text-xs text-gray-400">Supports PDF files up to 50MB</p>
+          <p className="mt-1 text-xs text-gray-400">Supports PDF files up to 1MB</p>
           <input
             id="file"
             type="file"
@@ -112,12 +138,15 @@ export function File_Uploader({
           />
         </label>
       ) : (
-        <div className="text-center text-sm font-medium text-green-600">
-          ✅ File selected:{' '}
-          <span className="inline-block max-w-full truncate align-middle" title={file.name}>
-            {file.name}
-          </span>
-        </div>
+        <>
+          <div className="text-center text-sm font-medium text-green-600">
+            ✅ File selected:{' '}
+            <span className="inline-block max-w-full truncate align-middle text-xs" title={file.name}>
+              {file.name}
+            </span>
+          </div>
+          {fileSizeError && <p className="text-sm text-red-500">{fileSizeError}</p>}
+        </>
       )}
 
       <Button

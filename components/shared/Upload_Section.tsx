@@ -4,6 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { VideoInput } from "./Video_Input"
 import { File_Uploader } from "./File_Uploader"
+import { HowToUseKurz } from "./How_To_USe"
+import { ScrollArea } from "../ui/scroll-area"
+import { VideoSummaryData } from "types/summaryType"
 
 
 export function UploadSection({
@@ -14,7 +17,7 @@ export function UploadSection({
   setVideoUrl,
 }: {
   isProcessing: boolean;
-  setSummary: React.Dispatch<React.SetStateAction<string | null>>;
+  setSummary: (data: string) => void
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
   videoUrl: string | null;
   setVideoUrl: (svideoUrl: string) => void;
@@ -29,6 +32,7 @@ export function UploadSection({
         <CardDescription>Upload a PDF file or provide a video URL to generate an AI summary</CardDescription>
       </CardHeader>
       <CardContent>
+
         <Tabs defaultValue="pdf" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="pdf">PDF Document</TabsTrigger>
@@ -52,6 +56,10 @@ export function UploadSection({
             />
           </TabsContent>
         </Tabs>
+        <ScrollArea className="h-[200px]">
+          <HowToUseKurz />
+        </ScrollArea>
+
       </CardContent>
     </Card>
   )

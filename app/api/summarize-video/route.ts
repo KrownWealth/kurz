@@ -28,27 +28,23 @@ export async function GET(req: NextRequest) {
       throw new Error("Transcription failed");
     }
 
-    // Extract just the text content
     const transcriptText = transcript.text;
 
-    const prompt = `
-      Summarize the following content:
-      ${transcriptText}
+    const userPrompt = `Here is the transcript for analysis:\n\n${transcriptText}`;
 
-      Please provide:
-      1. A concise overview
-      2. Key points
-      3. Actionable insights
-    `;
     // Generate summary with Gemini
     const summaryCompletion = await ai.models.generateContent({
       model: "gemini-2.0-flash",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: userPrompt }],
+        },
+      ],
     });
 
     const summaryText =
-      summaryCompletion.candidates?.[0]?.content?.parts?.[0]?.text ??
-      "Summary not available";
+      summaryCompletion.candidates?.[0]?.content?.parts?.[0]?.text;
 
     return NextResponse.json(
       {

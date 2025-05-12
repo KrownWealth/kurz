@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Header, HistorySidebar, SummarySection, UploadSection } from '../components/shared'
 import React, { useState } from 'react'
 import { VideoHistoryItem } from '../types/videoHistoryType';
+import { ScrollArea } from 'components/ui/scroll-area';
 
 
 const SummaryView = () => {
@@ -51,7 +52,7 @@ const SummaryView = () => {
 
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 lg:overflow-hidden">
       <Header
         isProcessing={isProcessing}
         setIsProcessing={setIsProcessing}
@@ -60,14 +61,19 @@ const SummaryView = () => {
         videoUrl={videoUrl} />
 
       <div className="flex flex-1 overflow-hidden">
-        <HistorySidebar
-          onSelectItem={handleVideoSelectFromHistory}
-          onDeleteItem={handleDeleteVideo} />
+        <div className=" lg:block hidden h-full overflow-y-auto">
 
-        <div className="flex-1 overflow-hidden">
-          <div className="container mx-auto px-4 py-6 h-full overflow-hidden">
+          <HistorySidebar
+            onSelectItem={handleVideoSelectFromHistory}
+            onDeleteItem={handleDeleteVideo}
+          />
+
+        </div>
+
+        <div className="flex-1 h-full">
+          <div className="container mx-auto px-4 py-6 h-full">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 h-full">
-              <div className="lg:col-span-4 flex flex-col">
+              <div className="lg:col-span-4 flex flex-col h-full">
                 <UploadSection
                   isProcessing={isProcessing}
                   setSummary={setSummary}
@@ -76,12 +82,15 @@ const SummaryView = () => {
                   setVideoUrl={setVideoUrl}
                 />
               </div>
-              <div className="lg:col-span-8 flex flex-col">
+              <div className="lg:col-span-8 flex flex-col h-full overflow-y-auto">
+
                 <SummarySection
-                  summary={summary}
+                  summary={summary || ""}
                   isProcessing={isProcessing}
                 />
+
               </div>
+
             </div>
           </div>
         </div>

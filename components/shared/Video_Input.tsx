@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { getVideoId } from "../../lib/get_youtube_video_id";
+import type { VideoSummaryData } from "types/summaryType";
+
 
 export function VideoInput({
   setSummary,
@@ -16,36 +19,21 @@ export function VideoInput({
   isProcessing,
   setIsProcessing
 }: {
-  setSummary: (summary: string) => void;
+  setSummary: (data: string) => void;
   isProcessing: boolean;
   videoUrl: string | null;
-  setVideoUrl: (svideoUrl: string) => void;
+  setVideoUrl: (videoUrl: string) => void;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>
 
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
-
-  const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState("");
+  const [fileSizeError, setFileSizeError] = useState("");
   const [activeTab, setActiveTab] = useState("url");
 
-  const POLLING_INTERVAL = 30000;
 
-  const validateUrl = (url: string) => {
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
-    const vimeoRegex = /^(https?:\/\/)?(www\.)?(vimeo\.com)\/.+$/;
 
-    if (!url) {
-      return "Please enter a URL";
-    }
-
-    if (!youtubeRegex.test(url) && !vimeoRegex.test(url)) {
-      return "Please enter a valid YouTube or Vimeo URL";
-    }
-
-    return "";
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -54,52 +42,63 @@ export function VideoInput({
     }
   };
 
-  const validateAndSetFile = (file: File) => {
-    const validTypes = ["video/mp4", "video/mov", "video/avi"];
-    const maxSize = 500 * 1024 * 1024; // 500MB
-
+  const validateAndSetFile = async (file: File) => {
+    const validTypes = ["video/mp4"];
     if (!validTypes.includes(file.type)) {
-      toast.error("Invalid file type");
-      return;
+      setFileSizeError("Invalid file type. Supported formats: MP4")
+      return false;
     }
 
+    const maxSize = 25 * 1024 * 1024; // 25MB
+
+
     if (file.size > maxSize) {
-      toast.error("File too large (max 500MB)");
-      return;
+      setFileSizeError("File too large (maximum 5MB allowed)")
+      return false;
     }
 
     setFile(file);
     setVideoUrl("");
     toast.success("File ready for upload");
+    return true;
   };
+
 
   const handleUrlSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const errorMsg = validateUrl(url);
-    if (errorMsg) {
-      setUrlError(errorMsg);
+
+    // Validate URL
+    if (!videoUrl) {
+      setUrlError("Please enter a YouTube URL");
       return;
     }
 
-    setUrlError("");
     setIsProcessing(true);
+    setProgress(0);
 
     try {
-      const response = await fetch(`/api/summarize?url=${encodeURIComponent(url)}`);
-      const data = await response.json();
+      const res = await fetch("/api/youtube-video-download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoUrl }),
+      });
 
-      if (data.success) {
-        setSummary(data.summary);
-        setVideoUrl(url); // Set the video URL for display
-      } else {
-        setTimeout(() => handleUrlSubmit(e), POLLING_INTERVAL);
-      }
+      const data = await res.json()
+      console.log("Video Url Summary Data", data.summary);
+      setSummary(data.summary);
+
+      setProgress(100);
+      toast.success("Video analysis complete!");
+
     } catch (error: any) {
-      toast.error("Error summarizing URL video");
+      toast.error(error.message);
+      console.error("Processing failed:", error);
     } finally {
       setIsProcessing(false);
     }
   };
+
+
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +140,7 @@ export function VideoInput({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <Tabs
         defaultValue="url"
         className="w-full"
@@ -158,21 +157,21 @@ export function VideoInput({
               <Label htmlFor="video-url">Video URL</Label>
               <Input
                 id="video-url"
-                placeholder="https://www.youtube.com/watch?v=..."
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                placeholder={`https://www.youtube.com/watch?v=...`}
+                value={videoUrl ?? ""}
+                onChange={(e) => setVideoUrl(e.target.value)}
                 disabled={isProcessing}
               />
               {urlError && <p className="text-sm text-red-500">{urlError}</p>}
               <p className="text-xs text-gray-500">
-                Supports YouTube and Vimeo videos
+                Supports only YouTube
               </p>
             </div>
 
             <Button
               type="submit"
               className="w-full"
-              disabled={!url || isProcessing}
+              disabled={!videoUrl || isProcessing}
             >
               {isProcessing ? (
                 <>
@@ -189,7 +188,8 @@ export function VideoInput({
         <TabsContent value="upload">
           <form onSubmit={handleUpload} className="space-y-4">
             {!file ? (
-              <div
+              <button
+                type="button"
                 className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer"
                 onClick={() => document.getElementById("video-upload")?.click()}
               >
@@ -202,15 +202,15 @@ export function VideoInput({
                   className="hidden"
                   onChange={handleFileChange}
                 />
-              </div>
+              </button>
             ) : (
               <div className="border rounded-lg p-4">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Video className="h-5 w-5" />
-                    <span>{file.name}</span>
+                    <span className="text-sm">{file.name}</span>
                   </div>
-                  <button onClick={() => setFile(null)}>
+                  <button type="button" onClick={() => setFile(null)}>
                     <X className="h-4 w-4" />
                   </button>
                 </div>
@@ -222,6 +222,8 @@ export function VideoInput({
                     </p>
                   </div>
                 )}
+
+                {fileSizeError && <p className="text-xs text-red-500 pt-2">{fileSizeError}</p>}
               </div>
             )}
 
@@ -249,15 +251,26 @@ export function VideoInput({
             {activeTab === "url" ? "Source Video" : "Uploaded Video"}
           </h3>
           <div className="rounded-lg overflow-hidden border">
-            <video
-              controls
-              className="w-full max-h-[400px]"
-              crossOrigin="anonymous"
-              key={videoUrl}
-            >
-              <source src={videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            {activeTab === "url" ? (
+              // Embedded player for URL videos
+              <iframe
+                src={`https://www.youtube.com/embed/${getVideoId(videoUrl)}`}
+                className="w-full aspect-video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              // Native player for uploaded videos
+              <video
+                controls
+                className="w-full max-h-[400px]"
+                crossOrigin="anonymous"
+                key={videoUrl}
+              >
+                <source src={videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            )}
           </div>
         </div>
       )}

@@ -8,13 +8,16 @@ import { HistorySidebar } from "./History_Sidebar";
 import { toast } from "sonner";
 import { VideoHistoryItem } from "../../types/videoHistoryType";
 
+
+
 export function Header({
   setSummary,
   setIsProcessing,
   setVideoUrl,
 }: {
   isProcessing: boolean;
-  setSummary: React.Dispatch<React.SetStateAction<string | null>>;
+  setSummary: (data: string) => void
+  //setSummary: React.Dispatch<React.SetStateAction<VideoSummaryData | null>>;
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
   videoUrl: string | null;
   setVideoUrl: (svideoUrl: string) => void;

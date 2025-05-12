@@ -159,83 +159,83 @@ export function HistorySidebar({
         </div>
       )}
 
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : filteredItems.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <Video className="h-8 w-8 mx-auto mb-2" />
-              <p>No video history found</p>
-            </div>
-          ) : (
-            filteredItems.map((item) => (
-              <button
-                key={item.id}
-                className={cn(
-                  "w-full text-left mb-2 rounded-md transition-colors group relative",
-                  "hover:bg-gray-100 dark:hover:bg-gray-800",
-                  item.active && "bg-gray-100 dark:bg-gray-800",
-                  isCollapsed ? "flex justify-center p-3" : "p-3",
-                )}
-                onClick={() => handleItemClick(item)}
-              >
-                {isCollapsed ? (
-                  <div className="flex items-center justify-center">
-                    <Video className="h-5 w-5 text-purple-500" />
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-3 w-full">
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={item.thumbnailUrl}
-                        alt="Video thumbnail"
-                        className="w-16 h-12 rounded object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/default-video-thumbnail.jpg';
-                        }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Video className="h-5 w-5 text-white opacity-80" />
-                      </div>
-                    </div>
 
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate dark:text-white text-left">
-                        {item.title}
+      <div className="p-2 ">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-40">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <Video className="h-8 w-8 mx-auto mb-2" />
+            <p>No video history found</p>
+          </div>
+        ) : (
+          filteredItems.map((item) => (
+            <button
+              key={item.id}
+              className={cn(
+                "w-full text-left mb-2 rounded-md transition-colors group relative",
+                "hover:bg-gray-100 dark:hover:bg-gray-800",
+                item.active && "bg-gray-100 dark:bg-gray-800",
+                isCollapsed ? "flex justify-center p-3" : "p-3",
+              )}
+              onClick={() => handleItemClick(item)}
+            >
+              {isCollapsed ? (
+                <div className="flex items-center justify-center">
+                  <Video className="h-5 w-5 text-purple-500" />
+                </div>
+              ) : (
+                <div className="flex items-start gap-3 w-full">
+                  <div className="relative flex-shrink-0">
+                    <img
+                      src={item.thumbnailUrl}
+                      alt="Video thumbnail"
+                      className="w-16 h-12 rounded object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/default-video-thumbnail.jpg';
+                      }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Video className="h-5 w-5 text-white opacity-80" />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate dark:text-white text-left">
+                      {item.title}
+                    </p>
+                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span>{item.date}</span>
+                    </div>
+                    {item.summary && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1 text-left">
+                        {item.summary}
                       </p>
-                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        <Clock className="h-3 w-3 mr-1" />
-                        <span>{item.date}</span>
-                      </div>
-                      {item.summary && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1 text-left">
-                          {item.summary}
-                        </p>
-                      )}
-                    </div>
-
-                    <button
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
-                      onClick={(e) => handleDelete(item, e)}
-                      disabled={isDeleting === item.id}
-                    >
-                      {isDeleting === item.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </button>
+                    )}
                   </div>
-                )}
-              </button>
-            ))
-          )}
-        </div>
-      </ScrollArea>
+
+                  <button
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                    onClick={(e) => handleDelete(item, e)}
+                    disabled={isDeleting === item.id}
+                  >
+                    {isDeleting === item.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              )}
+            </button>
+          ))
+        )}
+      </div>
+
     </div>
   );
 }

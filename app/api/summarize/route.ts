@@ -10,13 +10,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No PDF provided" }, { status: 400 });
   }
 
+  const userPrompt = `Here is the transcript for analysis:\n\n${body.text}`;
+
   try {
     const summaryCompletion = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: [
         {
           role: "user",
-          parts: [{ text: `Summarize the following text:\n\n${body.text}` }],
+          parts: [{ text: userPrompt }],
         },
       ],
     });
