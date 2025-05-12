@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { getVideoId } from "../../lib/get_youtube_video_id";
-import type { VideoSummaryData } from "types/summaryType";
+import { Card } from "components/ui/card";
 
 
 export function VideoInput({
@@ -140,61 +140,28 @@ export function VideoInput({
   };
 
   return (
-    <div className="space-y-8">
+    <Card className="space-y-8 p-4">
       <Tabs
-        defaultValue="url"
+        defaultValue="upload"
         className="w-full"
         onValueChange={(value) => setActiveTab(value)}
       >
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="url">Video URL</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-8">
           <TabsTrigger value="upload">Upload Video</TabsTrigger>
+          <TabsTrigger value="url">Video URL</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="url">
-          <form onSubmit={handleUrlSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="video-url">Video URL</Label>
-              <Input
-                id="video-url"
-                placeholder={`https://www.youtube.com/watch?v=...`}
-                value={videoUrl ?? ""}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                disabled={isProcessing}
-              />
-              {urlError && <p className="text-sm text-red-500">{urlError}</p>}
-              <p className="text-xs text-gray-500">
-                Supports only YouTube
-              </p>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!videoUrl || isProcessing}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Generate Summary"
-              )}
-            </Button>
-          </form>
-        </TabsContent>
 
         <TabsContent value="upload">
-          <form onSubmit={handleUpload} className="space-y-4">
+          <form onSubmit={handleUpload} className="flex flex-col space-y-6 items-center">
             {!file ? (
               <button
                 type="button"
-                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer"
+                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer w-full"
                 onClick={() => document.getElementById("video-upload")?.click()}
               >
                 <FileUp className="h-10 w-10 mx-auto" />
-                <p className="mt-2">Click to upload or drag and drop</p>
+                <p className="mt-2">Click to upload video</p>
                 <input
                   id="video-upload"
                   type="file"
@@ -243,6 +210,39 @@ export function VideoInput({
             </Button>
           </form>
         </TabsContent>
+
+        <TabsContent value="url">
+          <form onSubmit={handleUrlSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Input
+                id="video-url"
+                placeholder={`https://www.youtube.com/watch?v=...`}
+                value={videoUrl ?? ""}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                disabled={isProcessing}
+              />
+              {urlError && <p className="text-sm text-red-500">{urlError}</p>}
+              <p className="text-xs text-gray-500">
+                Supports only youTube video
+              </p>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!videoUrl || isProcessing}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Generate Summary"
+              )}
+            </Button>
+          </form>
+        </TabsContent>
       </Tabs>
 
       {videoUrl && (
@@ -274,6 +274,6 @@ export function VideoInput({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

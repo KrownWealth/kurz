@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { FileUp, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import * as pdfjsLib from 'pdfjs-dist'
-import type { VideoSummaryData } from '../../types/summaryType'
 import 'pdfjs-dist/web/pdf_viewer.css';
+import { Card } from 'components/ui/card'
+
 
 // Set up the PDF.js worker
 
@@ -120,7 +121,7 @@ export function File_Uploader({
   }
 
   return (
-    <div className="space-y-4">
+    <Card className="space-y-4 p-4">
       {!file ? (
         <label className="block border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer">
           <FileUp className="h-10 w-10 mx-auto text-gray-400" />
@@ -163,6 +164,6 @@ export function File_Uploader({
           'Summarize'
         )}
       </Button>
-    </div>
+    </Card>
   )
 }

@@ -9,6 +9,7 @@ import { cn } from "../../lib/utils";
 import { toast } from "sonner";
 import { VideoHistoryItem } from "../../types/videoHistoryType";
 import Image from "next/image";
+import { Card } from "components/ui/card";
 
 export function HistorySidebar({
   onSelectItem,
@@ -110,58 +111,29 @@ export function HistorySidebar({
   };
 
   return (
-    <div className={cn(
-      "hidden md:flex flex-col bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 h-full transition-all duration-300 ",
-      isCollapsed ? "w-16" : "w-72",
+    <Card className={cn(
+      "flex flex-col bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 transition-all duration-300",
     )}>
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-200">
-        {!isCollapsed && <h2 className="font-semibold text-lg dark:text-white">Video History</h2>}
+        <h2 className="font-semibold text-lg dark:text-white">Video History</h2>
         <div className="flex items-center gap-2">
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleRefresh}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCcw className="h-4 w-4" />
-              )}
-            </Button>
-          )}
+
           <Button
             variant="ghost"
             size="icon"
-            onClick={toggleSidebar}
-            className={cn("border", isCollapsed && "mx-auto border")}
+            onClick={handleRefresh}
+            disabled={isLoading}
           >
-            {isCollapsed ? (
-              <ChevronRight className="h-4 w-4 dark:text-white" />
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <ChevronLeft className="h-4 w-4 dark:text-white" />
+              <RefreshCcw className="h-4 w-4" />
             )}
           </Button>
         </div>
       </div>
 
-      {!isCollapsed && (
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search videos..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-      )}
-
-
-      <div className="p-2 ">
+      <div className="p-2 mt-6">
         {isLoading ? (
           <div className="flex justify-center items-center h-40">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -239,6 +211,6 @@ export function HistorySidebar({
         )}
       </div>
 
-    </div>
+    </Card>
   );
 }

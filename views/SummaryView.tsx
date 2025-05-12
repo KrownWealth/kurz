@@ -1,10 +1,14 @@
 'use client'
 
 import { toast } from 'sonner';
-import { Header, HistorySidebar, SummarySection, UploadSection } from '../components/shared'
+import { Header, HistorySidebar, SummarySection } from '../components/shared'
 import React, { useState } from 'react'
 import { VideoHistoryItem } from '../types/videoHistoryType';
-import { ScrollArea } from 'components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from 'components/ui/tabs';
+import { File_Uploader } from 'components/shared/File_Uploader';
+import { VideoInput } from 'components/shared/Video_Input';
+
+
 
 
 const SummaryView = () => {
@@ -52,50 +56,70 @@ const SummaryView = () => {
 
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 lg:overflow-hidden">
+    <>
       <Header
         isProcessing={isProcessing}
         setIsProcessing={setIsProcessing}
         setVideoUrl={setVideoUrl}
         setSummary={setSummary}
-        videoUrl={videoUrl} />
+        videoUrl={videoUrl}
+      />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className=" lg:block hidden h-full overflow-y-auto">
-
-          <HistorySidebar
-            onSelectItem={handleVideoSelectFromHistory}
-            onDeleteItem={handleDeleteVideo}
-          />
-
+      <section className="py-8 mb-12">
+        <div className="flex flex-col items-center mb-8 px-4 lg:px-0">
+          <h1 className="text-3xl md:text-4xl font-bold text-center mb-2">AI Learning Assistant</h1>
+          <p className="text-muted-foreground text-center max-w-2xl">
+            Upload your educational videos or PDF files and get AI-generated summaries to enhance your learning
+            experience.
+          </p>
         </div>
 
-        <div className="flex-1 h-full">
-          <div className="container mx-auto px-4 py-6 h-full">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 h-full">
-              <div className="lg:col-span-4 flex flex-col h-full">
-                <UploadSection
+
+        <Tabs defaultValue="pdf" className="w-full max-w-6xl mx-auto px-4 lg:px-0">
+          <TabsList className="grid w-full grid-cols-2 mb-12">
+            <TabsTrigger value="pdf">PDF Document</TabsTrigger>
+            <TabsTrigger value="video">Video URL</TabsTrigger>
+          </TabsList>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <TabsContent value="pdf" className="mb-8 mt-0">
+                <File_Uploader
+                  setIsProcessing={setIsProcessing}
                   isProcessing={isProcessing}
                   setSummary={setSummary}
+                />
+
+              </TabsContent>
+              <TabsContent value="video" className="mb-8 mt-0">
+                <VideoInput
+                  isProcessing={isProcessing}
                   setIsProcessing={setIsProcessing}
+                  setSummary={setSummary}
                   videoUrl={videoUrl}
                   setVideoUrl={setVideoUrl}
                 />
-              </div>
-              <div className="lg:col-span-8 flex flex-col h-full overflow-y-auto">
+              </TabsContent>
 
+              <div>
                 <SummarySection
                   summary={summary || ""}
                   isProcessing={isProcessing}
                 />
-
               </div>
+            </div>
 
+            <div className="mt-6 lg:mt-0 lg:col-span-1">
+              <HistorySidebar
+                onSelectItem={handleVideoSelectFromHistory}
+                onDeleteItem={handleDeleteVideo}
+              />
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </Tabs>
+
+      </section>
+
+    </>
 
 
 

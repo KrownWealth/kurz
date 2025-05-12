@@ -57,28 +57,28 @@ export function SummarySection({ summary, isProcessing }: SummaryProps) {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex-shrink-0">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-center lg:justify-between lg:items-center items-start">
           <div>
-            <CardTitle>Document Summary</CardTitle>
-            <CardDescription>Generated from your file</CardDescription>
+            <CardTitle className="text-sm lg:text-lg">Document Summary</CardTitle>
+            <CardDescription className="hidden text-sm">Generated from your file</CardDescription>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleCopy}>
               {copied ? (
                 <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Copied
+                  <Check className="lg:h-4 lg:w-4 mr-2 w-2 h-2" />
+                  <span className="text-xs"> Copied</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy
+                  <Copy className="lg:h-4 lg:w-4 h-2 w-2 mr-2" />
+                  <span className="text-xs"> Copy</span>
                 </>
               )}
             </Button>
             <Button variant="outline" size="sm" onClick={handleDownload}>
-              <Download className="h-4 w-4 mr-2" />
-              Download
+              <Download className="lg:h-4 lg:w-4 h-2 w-2 mr-2" />
+              <span className="text-xs"> Download</span>
             </Button>
           </div>
         </div>

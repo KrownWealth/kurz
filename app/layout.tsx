@@ -27,7 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <main>{children}</main>
+          <main className="container mx-auto">{children}</main>
           <Toaster />
         </ThemeProvider>
       </body>
