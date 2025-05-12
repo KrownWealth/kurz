@@ -8,6 +8,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "../../lib/utils";
 import { toast } from "sonner";
 import { VideoHistoryItem } from "../../types/videoHistoryType";
+import Image from "next/image";
 
 export function HistorySidebar({
   onSelectItem,
@@ -189,7 +190,7 @@ export function HistorySidebar({
               ) : (
                 <div className="flex items-start gap-3 w-full">
                   <div className="relative flex-shrink-0">
-                    <img
+                    <Image
                       src={item.thumbnailUrl}
                       alt="Video thumbnail"
                       className="w-16 h-12 rounded object-cover"
@@ -197,6 +198,8 @@ export function HistorySidebar({
                         const target = e.target as HTMLImageElement;
                         target.src = '/default-video-thumbnail.jpg';
                       }}
+                      width={100}
+                      height={100}
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Video className="h-5 w-5 text-white opacity-80" />
