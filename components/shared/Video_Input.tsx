@@ -31,6 +31,7 @@ export function VideoInput({
   const [urlError, setUrlError] = useState("");
   const [fileSizeError, setFileSizeError] = useState("");
   const [activeTab, setActiveTab] = useState("url");
+  const [uploadedVid, setUploadedVid] = useState<string | null>(null)
 
 
 
@@ -39,6 +40,11 @@ export function VideoInput({
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
       validateAndSetFile(file);
+    }
+    if (file && file.type.startsWith('video/')) {
+      setFile(file)
+      const url = URL.createObjectURL(file)
+      setUploadedVid(url)
     }
   };
 
@@ -259,7 +265,7 @@ export function VideoInput({
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
-            ) : (
+            ) : uploadedVid ? (
               // Native player for uploaded videos
               <video
                 controls
@@ -270,10 +276,11 @@ export function VideoInput({
                 <source src={videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
-            )}
+            ) : null}
           </div>
         </div>
       )}
+
     </Card>
   );
 }
