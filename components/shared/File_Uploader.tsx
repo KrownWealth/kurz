@@ -3,10 +3,9 @@
 import { useState } from 'react'
 import { FileUp, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
+import { Card } from '../ui/card'
 import * as pdfjsLib from 'pdfjs-dist'
 import 'pdfjs-dist/web/pdf_viewer.css';
-import { Card } from 'components/ui/card'
-
 
 // Set up the PDF.js worker
 
@@ -25,6 +24,9 @@ type PDFTextItem = {
   hasEOL?: boolean
 }
 
+
+
+
 export function File_Uploader({
   isProcessing,
   setSummary,
@@ -35,32 +37,30 @@ export function File_Uploader({
   setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   const [file, setFile] = useState<File | null>(null)
-  const [fileSizeError, setFileSizeError] = useState("");
+  const [fileSizeError, setFileSizeError] = useState("")
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0]
-      validateAndSetFile(selectedFile)
-    }
+    const selectedFile = e.target.files?.[0]
+    if (!selectedFile) return
+
+
+    validateAndSetFile(selectedFile)
   }
 
-  const validateAndSetFile = async (file: File) => {
-    const validTypes = [".pdf"];
-    if (!validTypes.includes(file.type)) {
-      setFileSizeError("Invalid file type. Supported formats: PDF")
-      return false;
+  const validateAndSetFile = (file: File) => {
+    if (file.type !== "application/pdf") {
+      setFileSizeError("Invalid file type. Only PDF allowed.")
+      return
     }
 
-    const maxSize = 1 * 1024 * 1024; // 1MB 
-    if (file.size > maxSize) {
-      setFileSizeError("PDF File too large (maximum 1MB is allowed")
-      return false;
+    if (file.size > 1 * 1024 * 1024) {
+      setFileSizeError("PDF File too large (maximum 1MB).")
+      return
     }
 
-    setFile(file);
-    return true;
-  };
-
+    setFile(file)
+    setFileSizeError("")
+  }
 
   const handleSummarize = async () => {
     if (!file || isProcessing) return
@@ -120,34 +120,36 @@ export function File_Uploader({
     }
   }
 
+
   return (
     <Card className="space-y-4 p-4">
-      {!file ? (
-        <label className="block border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer">
-          <FileUp className="h-10 w-10 mx-auto text-gray-400" />
-          <h3 className="mt-4 text-lg font-semibold">Upload PDF File</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Drag and drop your file here, or click to browse
-          </p>
-          <p className="mt-1 text-xs text-gray-400">Supports PDF files up to 1MB</p>
-          <input
-            id="file"
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </label>
-      ) : (
-        <>
-          <div className="text-center text-sm font-medium text-green-600">
-            ✅ File selected:{' '}
-            <span className="inline-block max-w-full truncate align-middle text-xs" title={file.name}>
-              {file.name}
-            </span>
-          </div>
-          {fileSizeError && <p className="text-sm text-red-500">{fileSizeError}</p>}
-        </>
+      <label
+        htmlFor="file"
+        className="block border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors cursor-pointer"
+      >
+        <FileUp className="h-10 w-10 mx-auto text-gray-400" />
+        <h3 className="mt-4 text-lg font-semibold">Upload PDF File</h3>
+        <p className="mt-2 text-sm text-gray-500">
+          Drag and drop your file here, or click to browse
+        </p>
+        <p className="mt-1 text-xs text-gray-400">Supports PDF files up to 1MB</p>
+      </label>
+
+      <input
+        id="file"
+        type="file"
+        accept=".pdf"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      {file && (
+        <div className="text-center text-sm font-medium text-green-600">
+          ✅ File selected: <span className="text-xs">{file.name}</span>
+        </div>
+      )}
+      {fileSizeError && (
+        <p className="text-sm text-red-500">{fileSizeError}</p>
       )}
 
       <Button
