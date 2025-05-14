@@ -18,7 +18,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    await pusherServer.trigger(channelId, "status", { status: "transcribing" });
+    await pusherServer.trigger(channelId, "status", {
+      status: "transcribing",
+      message: "Sending video to AssemblyAI for transcription",
+    });
 
     // Transcribe with AssemblyAI
     const transcript = await assemblyai.transcripts.create({
@@ -64,6 +67,10 @@ export async function POST(req: Request) {
     const summaryText =
       summaryCompletion.candidates?.[0]?.content?.parts?.[0]?.text;
 
+    if (!summaryText) {
+      throw new Error("AI did not return a summary.");
+    }
+
     // Send the final result
     await pusherServer.trigger(channelId, "summary", {
       summary: summaryText,
@@ -77,4 +84,9 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+}
+
+// Explicitly handle OPTIONS for CORS preflight
+export async function OPTIONS() {
+  return NextResponse.json({}, { status: 200 });
 }

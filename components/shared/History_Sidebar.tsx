@@ -8,41 +8,25 @@ import { toast } from "sonner";
 import { VideoHistoryItem } from "../../types/videoHistoryType";
 import Image from "next/image";
 import { Card } from "components/ui/card";
-import Pusher from "pusher-js";
-import type { Channel } from 'pusher-js';
 
 
 
 export function HistorySidebar({
+  historyItems,
+  setHistoryItems,
   onSelectItem,
   onRefresh,
-  setSummary,
-  setIsProcessing
 }: {
+  historyItems: VideoHistoryItem[];
+  setHistoryItems: React.Dispatch<React.SetStateAction<VideoHistoryItem[]>>;
   onSelectItem: (item: VideoHistoryItem) => void;
   onRefresh?: () => void;
   setSummary: (data: string) => void;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
 
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [historyItems, setHistoryItems] = useState<VideoHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [pusherChannel, setPusherChannel] = useState<Channel | null>(null);
-
-
-  useEffect(() => {
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_APP_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-    });
-
-    return () => {
-      pusher.disconnect();
-    };
-  }, []);
-
 
 
   useEffect(() => {
@@ -55,7 +39,6 @@ export function HistorySidebar({
         if (data.success) {
           setHistoryItems(
             data.videos.map((video: any) => {
-              console.log("Fetched video:", video);
               return {
                 ...video,
                 active: false,
@@ -76,76 +59,6 @@ export function HistorySidebar({
     fetchVideos();
   }, []);
 
-  const filteredItems = historyItems.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-
-  const handleItemClick = async (item: VideoHistoryItem) => {
-    const updatedItems = historyItems.map(i => ({
-      ...i,
-      active: i.id === item.id
-    }));
-    setHistoryItems(updatedItems);
-    onSelectItem(item);
-
-
-    const channelId = `summary-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-    // Initialize Pusher and subscribe to channel
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_APP_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-    });
-    const channel = pusher.subscribe(channelId);
-    setPusherChannel(channel);
-
-    // Set up event listeners
-    channel.bind('status', (data: { status: string }) => {
-      toast.info(`Status: ${data.status}`);
-    });
-
-    channel.bind('summary', (data: { summary: string }) => {
-      setSummary(data.summary);
-      setIsProcessing(false);
-      toast.success("Summary generated!");
-      cleanupPusher(channel, channelId);
-    });
-
-    channel.bind('error', (data: { error: string }) => {
-      toast.error(data.error);
-      setIsProcessing(false);
-      cleanupPusher(channel, channelId);
-    });
-
-    // Start the summarization process
-    setIsProcessing(true);
-    try {
-      const response = await fetch('/api/summarize-video', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          videoUrl: item.videoUrl,
-          channelId: channelId
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to start summarization');
-      }
-    } catch (error) {
-      toast.error("Failed to start summarization");
-      setIsProcessing(false);
-      cleanupPusher(channel, channelId);
-    }
-  };
-
-  const cleanupPusher = (channel: Channel, channelId: string) => {
-    channel.unbind_all();
-    const pusher = channel.pusher;
-    pusher.unsubscribe(channelId);
-  };
 
 
 
@@ -238,13 +151,13 @@ export function HistorySidebar({
           <div className="flex justify-center items-center h-40">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
-        ) : filteredItems.length === 0 ? (
+        ) : historyItems.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <Video className="h-8 w-8 mx-auto mb-2" />
             <p>No video history found</p>
           </div>
         ) : (
-          filteredItems.map((item) => (
+          historyItems.map((item) => (
             <button
               key={item.id}
               className={cn(
@@ -252,7 +165,7 @@ export function HistorySidebar({
                 "hover:bg-gray-100 dark:hover:bg-gray-800",
                 item.active && "bg-gray-100 dark:bg-gray-800",
               )}
-              onClick={() => handleItemClick(item)}
+              onClick={() => onSelectItem(item)}
             >
 
               <div className="flex items-start gap-3 w-full">
