@@ -38,12 +38,14 @@ const SummaryView = () => {
     };
   }, [pusherChannel]);
 
-  const handleItemClick = async (item: VideoHistoryItem) => {
+
+  const handleItemSelect = async (item: VideoHistoryItem) => {
     const updatedItems = historyItems.map(i => ({
       ...i,
       active: i.id === item.id
     }));
     setHistoryItems(updatedItems);
+
 
     const channelId = `summary-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
@@ -163,7 +165,7 @@ const SummaryView = () => {
                 historyItems={historyItems}
                 setHistoryItems={setHistoryItems}
                 setSummary={setSummary}
-                onSelectItem={handleItemClick}
+                onSelectItem={handleItemSelect}
               />
             </div>
           </div>

@@ -160,6 +160,7 @@ export function HistorySidebar({
           historyItems.map((item) => (
             <button
               key={item.id}
+              type="button"
               className={cn(
                 "w-full text-left mb-2 rounded-md transition-colors group relative",
                 "hover:bg-gray-100 dark:hover:bg-gray-800",
@@ -202,7 +203,7 @@ export function HistorySidebar({
                 </div>
 
                 <button
-
+                  type="button"
                   onClick={(e) => handleDelete(item, e)}
                   disabled={isDeleting === item.id}
                 >

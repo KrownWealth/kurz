@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '../components/shared/Theme_Provider'
 import { Toaster } from "../components/ui/sonner"
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <main className="container mx-auto">{children}</main>
           <Toaster />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
