@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { AssemblyAI } from "assemblyai";
+import { pusherServer } from "lib/pusher";
 
 const ai = new GoogleGenAI({ apiKey: process.env.AI_STUDIO });
 
 const assemblyai = new AssemblyAI({ apiKey: process.env.ASSEMBLYAI_KEY! });
 
-export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const videoUrl = searchParams.get("url");
+export async function POST(req: Request) {
+  const { videoUrl, channelId } = await req.json();
 
-  if (!videoUrl) {
+  if (!videoUrl || !channelId) {
     return NextResponse.json(
-      { available: false, error: "Missing 'url' parameter" },
+      { error: "Missing videoUrl or channelId" },
       { status: 400 }
     );
   }
 
   try {
+    await pusherServer.trigger(channelId, "status", { status: "transcribing" });
+
     // Transcribe with AssemblyAI
     const transcript = await assemblyai.transcripts.create({
       audio_url: videoUrl,
@@ -27,6 +29,8 @@ export async function GET(req: NextRequest) {
     if (!transcript.text) {
       throw new Error("Transcription failed");
     }
+
+    await pusherServer.trigger(channelId, "status", { status: "analyzing" });
 
     const transcriptText = transcript.text;
 
@@ -47,7 +51,6 @@ export async function GET(req: NextRequest) {
     End with actionable takeaways in bullet points, offering practical advice or steps based on the video content.
 \n\n${transcriptText}`;
 
-    // Generate summary with Gemini
     const summaryCompletion = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: [
@@ -61,18 +64,17 @@ export async function GET(req: NextRequest) {
     const summaryText =
       summaryCompletion.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    return NextResponse.json(
-      {
-        available: true,
-        success: true,
-        summary: summaryText,
-      },
-      { status: 200 }
-    );
+    // Send the final result
+    await pusherServer.trigger(channelId, "summary", {
+      summary: summaryText,
+      status: "completed",
+    });
+
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: any) {
-    return NextResponse.json(
-      { available: false, error: error.message },
-      { status: 500 }
-    );
+    await pusherServer.trigger(channelId, "error", {
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

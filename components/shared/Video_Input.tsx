@@ -55,11 +55,11 @@ export function VideoInput({
       return false;
     }
 
-    const maxSize = 25 * 1024 * 1024; // 25MB
+    const maxSize = 15 * 1024 * 1024; // 15MB
 
 
     if (file.size > maxSize) {
-      setFileSizeError("File too large (maximum 5MB allowed)")
+      setFileSizeError("File too large (maximum 15MB allowed)");
       return false;
     }
 
@@ -171,7 +171,7 @@ export function VideoInput({
                 <input
                   id="video-upload"
                   type="file"
-                  accept="video/*"
+                  accept="video/mp4"
                   className="hidden"
                   onChange={handleFileChange}
                 />
@@ -179,14 +179,15 @@ export function VideoInput({
             ) : (
               <div className="border rounded-lg p-4">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 max-w-[200px]">
                     <Video className="h-5 w-5" />
-                    <span className="text-sm">{file.name}</span>
+                    <span className="text-sm truncate max-w-[150px] block">{file.name}</span>
                   </div>
                   <button type="button" onClick={() => setFile(null)}>
                     <X className="h-4 w-4" />
                   </button>
                 </div>
+
                 {progress > 0 && (
                   <div className="mt-4">
                     <Progress value={progress} />

@@ -113,9 +113,57 @@ export async function POST(req: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  let publicId = searchParams.get("id");
+
+  if (!publicId) {
+    return NextResponse.json({ error: "Missing public ID" }, { status: 400 });
+  }
+
+  try {
+    publicId = decodeURIComponent(publicId);
+    publicId = publicId.replace(/^v\d+\//, "");
+
+    const result = await cloudinary.v2.uploader.destroy(publicId, {
+      resource_type: "video",
+      invalidate: true,
+      type: "upload",
+    });
+
+    console.log("Cloudinary deletion result:", result);
+
+    if (result.result !== "ok") {
+      return NextResponse.json(
+        {
+          error: "Failed to delete from Cloudinary",
+          details: result,
+          publicIdUsed: publicId,
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true, publicId }, { status: 200 });
+  } catch (error: any) {
+    console.error("Cloudinary deletion error:", error);
+    return NextResponse.json(
+      {
+        error: error.message,
+        publicIdAttempted: publicId,
+      },
+      { status: 500 }
+    );
+  }
+}
+
 // Helper function to generate file hash
 async function createFileHash(buffer: Buffer): Promise<string> {
-  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const arrayBuffer = buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength
+  ) as ArrayBuffer;
+  const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }

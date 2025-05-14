@@ -3,7 +3,6 @@
 import { toast } from 'sonner';
 import { Header, HistorySidebar, SummarySection } from '../components/shared'
 import React, { useState } from 'react'
-import { VideoHistoryItem } from '../types/videoHistoryType';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'components/ui/tabs';
 import { File_Uploader } from 'components/shared/File_Uploader';
 import { VideoInput } from 'components/shared/Video_Input';
@@ -33,24 +32,6 @@ const SummaryView = () => {
       toast.error(error.message || "Error summarizing video");
     } finally {
       setIsProcessing(false);
-    }
-  };
-
-  const handleDeleteVideo = async (item: VideoHistoryItem): Promise<void> => {
-    try {
-      const response = await fetch(`/api/cloudinary?id=${item.id}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete video");
-      }
-
-      toast.success("Video deleted successfully");
-    } catch (error: any) {
-      console.error("Error deleting video:", error);
-      toast.error(error.message || "Error deleting video");
-      throw error; // Re-throw the error if you want the calling component to handle it
     }
   };
 
@@ -110,8 +91,10 @@ const SummaryView = () => {
 
             <div className="mt-6 lg:mt-0 lg:col-span-1">
               <HistorySidebar
+                setIsProcessing={setIsProcessing}
+                setSummary={setSummary}
                 onSelectItem={handleVideoSelectFromHistory}
-                onDeleteItem={handleDeleteVideo}
+
               />
             </div>
           </div>
