@@ -13,7 +13,7 @@ import { VideoHistoryItem } from 'types/videoHistoryType';
 const SummaryView = () => {
   const [summary, setSummary] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [pusherChannel, setPusherChannel] = useState<Channel | null>(null);
   const [historyItems, setHistoryItems] = useState<VideoHistoryItem[]>([]);
 
@@ -63,14 +63,14 @@ const SummaryView = () => {
 
     const summaryHandler = (data: { summary: string }) => {
       setSummary(data.summary);
-      setIsProcessing(false);
+      setIsGenerating(false);
       toast.success("Summary generated!");
       cleanupPusher(channel, channelId);
     };
 
     const errorHandler = (data: { error: string }) => {
       toast.error(data.error);
-      setIsProcessing(false);
+      setIsGenerating(false);
       cleanupPusher(channel, channelId);
     };
 
@@ -78,7 +78,7 @@ const SummaryView = () => {
     channel.bind('summary', summaryHandler);
     channel.bind('error', errorHandler);
 
-    setIsProcessing(true);
+    setIsGenerating(true);
 
     try {
       const response = await fetch('/api/summarize-video', {
@@ -96,7 +96,7 @@ const SummaryView = () => {
     } catch (error) {
       console.error('Error starting summarization:', error);
       toast.error("Failed to start video processing");
-      setIsProcessing(false);
+      setIsGenerating(false);
       cleanupPusher(channel, channelId);
     }
   };
@@ -112,8 +112,8 @@ const SummaryView = () => {
   return (
     <>
       <Header
-        isProcessing={isProcessing}
-        setIsProcessing={setIsProcessing}
+        isGenerating={isGenerating}
+        setIsGenerating={setIsGenerating}
         setVideoUrl={setVideoUrl}
         setSummary={setSummary}
         videoUrl={videoUrl}
@@ -127,8 +127,25 @@ const SummaryView = () => {
             experience.
           </p>
         </div>
+        <div className="w-full max-w-6xl mx-auto px-4 lg:px-0">
 
-        <Tabs defaultValue="pdf" className="w-full max-w-6xl mx-auto px-4 lg:px-0">
+          <div className="mb-4">
+            <File_Uploader
+              setIsGenerating={setIsGenerating}
+              isGenerating={isGenerating}
+              setSummary={setSummary}
+            />
+          </div>
+          <div className='mb-2'><h4>Generated Summary</h4></div>
+          <div>
+            <SummarySection
+              summary={summary || ""}
+              isGenerating={isGenerating}
+            />
+          </div>
+        </div>
+
+        {/* <Tabs defaultValue="pdf" className="w-full max-w-6xl mx-auto px-4 lg:px-0">
           <TabsList className="grid w-full grid-cols-2 mb-12">
             <TabsTrigger value="pdf">PDF Document</TabsTrigger>
             <TabsTrigger value="video">Video URL</TabsTrigger>
@@ -137,15 +154,15 @@ const SummaryView = () => {
             <div className="lg:col-span-2">
               <TabsContent value="pdf" className="mb-8 mt-0">
                 <File_Uploader
-                  setIsProcessing={setIsProcessing}
-                  isProcessing={isProcessing}
+                  setIsGenerating={setIsGenerating}
+                  isGenerating={isGenerating}
                   setSummary={setSummary}
                 />
               </TabsContent>
               <TabsContent value="video" className="mb-8 mt-0">
                 <VideoInput
-                  isProcessing={isProcessing}
-                  setIsProcessing={setIsProcessing}
+                  isGenerating={isGenerating}
+                  setIsGenerating={setIsGenerating}
                   setSummary={setSummary}
                   videoUrl={videoUrl}
                   setVideoUrl={setVideoUrl}
@@ -155,7 +172,7 @@ const SummaryView = () => {
               <div>
                 <SummarySection
                   summary={summary || ""}
-                  isProcessing={isProcessing}
+                  isGenerating={isGenerating}
                 />
               </div>
             </div>
@@ -169,7 +186,7 @@ const SummaryView = () => {
               />
             </div>
           </div>
-        </Tabs>
+        </Tabs> */}
       </section>
     </>
   );

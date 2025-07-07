@@ -11,10 +11,10 @@ import { ScrollArea } from "components/ui/scroll-area"
 
 interface SummaryProps {
   summary: string;
-  isProcessing: boolean;
+  isGenerating: boolean;
 }
 
-export function SummarySection({ summary, isProcessing }: SummaryProps) {
+export function SummarySection({ summary, isGenerating }: SummaryProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -43,7 +43,7 @@ export function SummarySection({ summary, isProcessing }: SummaryProps) {
     toast.success("Download started")
   }
 
-  if (!summary && !isProcessing) {
+  if (!summary && !isGenerating) {
     return (
       <Card className="h-full flex flex-col max-h-screen">
         <CardHeader>
@@ -85,7 +85,7 @@ export function SummarySection({ summary, isProcessing }: SummaryProps) {
       </CardHeader>
 
       <CardContent className="flex-1 overflow-auto">
-        {isProcessing ? (
+        {isGenerating ? (
           <div>
             Summarizing please wait...
           </div>

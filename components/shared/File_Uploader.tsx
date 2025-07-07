@@ -28,13 +28,13 @@ type PDFTextItem = {
 
 
 export function File_Uploader({
-  isProcessing,
+  isGenerating,
   setSummary,
-  setIsProcessing
+  setIsGenerating
 }: {
-  isProcessing: boolean
+  isGenerating: boolean
   setSummary: (data: string) => void;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>
+  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   const [file, setFile] = useState<File | null>(null)
   const [fileSizeError, setFileSizeError] = useState("")
@@ -63,9 +63,9 @@ export function File_Uploader({
   }
 
   const handleSummarize = async () => {
-    if (!file || isProcessing) return
+    if (!file || isGenerating) return
 
-    setIsProcessing(true)
+    setIsGenerating(true)
 
     try {
       const reader = new FileReader()
@@ -76,7 +76,7 @@ export function File_Uploader({
         const typedArray = new Uint8Array(result as ArrayBuffer)
         const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise
         if (pdf.numPages > 10) {
-          setIsProcessing(false);
+          setIsGenerating(false);
           setFileSizeError("This app supports a maximum of 10 pages per PDF.")
           return;
         }
@@ -95,7 +95,7 @@ export function File_Uploader({
       reader.readAsArrayBuffer(file)
     } catch (err) {
       console.error('❌ Summary Error:', err)
-      setIsProcessing(false)
+      setIsGenerating(false)
     }
   }
 
@@ -116,7 +116,7 @@ export function File_Uploader({
     } catch (error) {
       console.error('❌ Failed to send to API:', error)
     } finally {
-      setIsProcessing(false)
+      setIsGenerating(false)
     }
   }
 
@@ -154,10 +154,10 @@ export function File_Uploader({
 
       <Button
         className="w-full"
-        disabled={!file || isProcessing}
+        disabled={!file || isGenerating}
         onClick={handleSummarize}
       >
-        {isProcessing ? (
+        {isGenerating ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Summarizing...

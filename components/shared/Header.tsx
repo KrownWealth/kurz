@@ -12,20 +12,21 @@ import { VideoHistoryItem } from "../../types/videoHistoryType";
 
 export function Header({
   setSummary,
-  setIsProcessing,
+  isGenerating,
+  setIsGenerating,
   setVideoUrl,
 }: {
-  isProcessing: boolean;
+  isGenerating: boolean;
   setSummary: (data: string) => void
   //setSummary: React.Dispatch<React.SetStateAction<VideoSummaryData | null>>;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
   videoUrl: string | null;
   setVideoUrl: (svideoUrl: string) => void;
 }) {
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
 
   const handleVideoSelectFromHistory = async (item: any) => {
-    setIsProcessing(true);
+    setIsGenerating(true);
     try {
       // Call your summarization API with the selected video URL
       const response = await fetch(`/api/summarize-video?url=${encodeURIComponent(item.videoUrl)}`);
@@ -40,7 +41,7 @@ export function Header({
     } catch (error: any) {
       toast.error(error.message || "Error summarizing video");
     } finally {
-      setIsProcessing(false);
+      setIsGenerating(false);
     }
   };
 

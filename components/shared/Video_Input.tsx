@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Loader2, FileUp, Video, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { getVideoId } from "../../lib/get_youtube_video_id";
 import { Card } from "components/ui/card";
@@ -16,14 +15,14 @@ export function VideoInput({
   setSummary,
   videoUrl,
   setVideoUrl,
-  isProcessing,
-  setIsProcessing
+  isGenerating,
+  setIsGenerating,
 }: {
   setSummary: (data: string) => void;
-  isProcessing: boolean;
+  isGenerating: boolean;
   videoUrl: string | null;
   setVideoUrl: (videoUrl: string) => void;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>
+  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>
 
 }) {
   const [file, setFile] = useState<File | null>(null);
@@ -32,7 +31,16 @@ export function VideoInput({
   const [fileSizeError, setFileSizeError] = useState("");
   const [activeTab, setActiveTab] = useState("url");
   const [uploadedVid, setUploadedVid] = useState<string | null>(null)
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
+
+  useEffect(() => {
+    if (!isUploading && !isGenerating && progress === 100) {
+      const timeout = setTimeout(() => setProgress(0), 2000); // reset after 2s
+      return () => clearTimeout(timeout);
+    }
+  }, [isUploading, isGenerating, progress]);
 
 
 
@@ -79,7 +87,7 @@ export function VideoInput({
       return;
     }
 
-    setIsProcessing(true);
+    setIsGenerating(true);
     setProgress(0);
 
     try {
@@ -100,17 +108,16 @@ export function VideoInput({
       toast.error(error.message);
       console.error("Processing failed:", error);
     } finally {
-      setIsProcessing(false);
+      setIsGenerating(false);
     }
   };
 
 
-
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleFileUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
 
-    setIsProcessing(true);
+    setIsUploading(true);
     setProgress(0);
 
     try {
@@ -127,7 +134,22 @@ export function VideoInput({
       const { videoUrl } = await uploadResponse.json();
       setVideoUrl(videoUrl);
       setProgress(50);
+      setIsUploaded(true);
+      toast.success("Upload successful! Ready to generate summary.");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
+  const handleGenerateSummary = async () => {
+    if (!videoUrl) return;
+
+    setIsGenerating(true);
+    setProgress(50);
+
+    try {
       const summaryResponse = await fetch(
         `/api/summarize-video?url=${encodeURIComponent(videoUrl)}`
       );
@@ -141,9 +163,10 @@ export function VideoInput({
     } catch (error: any) {
       toast.error(error.message);
     } finally {
-      setIsProcessing(false);
+      setIsGenerating(false);
     }
   };
+
 
   return (
     <Card className="space-y-8 p-4">
@@ -159,7 +182,7 @@ export function VideoInput({
 
 
         <TabsContent value="upload">
-          <form onSubmit={handleUpload} className="flex flex-col space-y-6 items-center">
+          <form onSubmit={handleFileUpload} className="flex flex-col space-y-6 items-center">
             {!file ? (
               <button
                 type="button"
@@ -188,11 +211,12 @@ export function VideoInput({
                   </button>
                 </div>
 
-                {progress > 0 && (
+                {progress < 100 && (
                   <div className="mt-4">
-                    <Progress value={progress} />
-                    <p className="text-sm mt-1">
-                      {isProcessing ? "Processing..." : "Uploading..."}
+                    <p className="text-xs text-gray-500">
+                      {progress === 0
+                        ? "Upload your video to get started"
+                        : "Uploaded successful click generate summary"}
                     </p>
                   </div>
                 )}
@@ -200,8 +224,28 @@ export function VideoInput({
                 {fileSizeError && <p className="text-xs text-red-500 pt-2">{fileSizeError}</p>}
               </div>
             )}
+            {!videoUrl ? (
+              <Button
+                type="submit"
+                disabled={!file || isGenerating}
+                className="w-full"
+              >
+                {isUploading ? "Uploading..." : "Upload File"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleGenerateSummary}
+                disabled={isGenerating}
+                className="w-full"
+                variant="secondary"
+              >
+                {isGenerating ? "Processing..." : "Generate Summary"}
+              </Button>
+            )}
 
-            <Button
+
+            {/* <Button
               type="submit"
               className="w-full"
               disabled={!file || isProcessing}
@@ -214,7 +258,7 @@ export function VideoInput({
               ) : (
                 "Generate Summary"
               )}
-            </Button>
+            </Button> */}
           </form>
         </TabsContent>
 
@@ -226,7 +270,7 @@ export function VideoInput({
                 placeholder={`https://www.youtube.com/watch?v=...`}
                 value={videoUrl ?? ""}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                disabled={isProcessing}
+                disabled={isGenerating}
               />
               {urlError && <p className="text-sm text-red-500">{urlError}</p>}
               <p className="text-xs text-gray-500">
@@ -237,9 +281,9 @@ export function VideoInput({
             <Button
               type="submit"
               className="w-full"
-              disabled={!videoUrl || isProcessing}
+              disabled={!videoUrl || isGenerating}
             >
-              {isProcessing ? (
+              {isGenerating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Processing...
