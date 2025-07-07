@@ -11,11 +11,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Kurz | AI-powered summarization tool for videos and PDFs',
+    default: 'Kurz | AI-powered summarization tool for PDFs',
     template: '%s | Kurz AI'
   },
-  description: 'AI-powered summarization tool for videos and PDFs',
-  keywords: ['AI summarizer', 'video summary', 'PDF summary', 'EdTech'],
+  description: 'AI-powered summarization tool for PDFs',
+  keywords: ['AI summarizer', 'PDF summary', 'EdTech'],
 }
 
 
